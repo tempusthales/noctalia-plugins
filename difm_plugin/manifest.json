@@ -1,0 +1,28 @@
+{
+  "id": "difm",
+  "name": "DI.FM",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "tempusthales",
+  "license": "MIT",
+  "repository": "https://github.com/tempusthales/noctalia-plugins",
+  "description": "DI.FM electronic music radio player. Browse and stream channels directly from the bar.",
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "listenKey": "",
+      "quality": "premium_high",
+      "lastChannel": "",
+      "lastChannelName": "",
+      "volume": 80
+    }
+  }
+}

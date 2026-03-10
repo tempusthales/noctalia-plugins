@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 import qs.Services.UI
-import "."
+import "." as Local
 
 Item {
     id: root
@@ -264,7 +264,7 @@ Item {
                         model:   root.filteredChannels
                         spacing: Style.marginXS
 
-                        delegate: ChannelDelegate {
+                        delegate: Local.ChannelDelegate {
                             width:         channelList.width
                             channelData:   modelData
                             isActive:      modelData.key === (root.main?.currentChannelKey || "")

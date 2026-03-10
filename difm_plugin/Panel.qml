@@ -38,7 +38,8 @@ Item {
         })
     }
 
-    onMainChanged: {
+    onPluginApiChanged: Logger.i("DIFM", "pluginApi changed: " + pluginApi)
+    onMainChanged: { Logger.i("DIFM", "main changed, channelsLoaded=" + root.channels.length > 0 + " channels=" + (main?.channels?.length ?? -1))
         if (main) root.localVolume = main.volume
     }
 
@@ -77,7 +78,7 @@ Item {
 
                     NText {
                         text: root.isPlaying ? root.channelName
-                            : root.channelsLoaded ? "DI.FM"
+                            : root.channels.length > 0 ? "DI.FM"
                             : "Loading channels…"
                         color:       Color.mOnSurface
                         pointSize:   Style.fontSizeM
@@ -96,7 +97,7 @@ Item {
                     }
 
                     NText {
-                        visible:   !root.isPlaying && !root.channelsLoaded
+                        visible:   !root.isPlaying && root.channels.length === 0
                         text:      root.notConfigured ? "Set your Listen Key in plugin settings" : "No channels loaded"
                         color:     root.notConfigured ? Color.mError : Color.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
@@ -105,7 +106,7 @@ Item {
                     }
 
                     NText {
-                        visible:   !root.isPlaying && root.channelsLoaded && root.channelName !== ""
+                        visible:   !root.isPlaying && root.channels.length > 0 && root.channelName !== ""
                         text:      "Last: " + root.channelName
                         color:     Color.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
@@ -118,7 +119,7 @@ Item {
                     text:           root.isPlaying ? "Stop" : "Play"
                     implicitWidth:  56
                     implicitHeight: 36
-                    enabled: root.isPlaying || (root.channelsLoaded && (root.main?.currentChannelKey || "") !== "")
+                    enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
 
                     onClicked: {
                         if (root.isPlaying) {
@@ -204,7 +205,7 @@ Item {
                 placeholderText:  "Search channels…"
                 text:             root.searchText
                 onTextChanged:    root.searchText = text
-                visible:          root.channelsLoaded
+                visible:          root.channels.length > 0
             }
 
             // ── Channel list ───────────────────────────────────────────────
@@ -216,7 +217,7 @@ Item {
                 clip:   true
 
                 ColumnLayout {
-                    visible:          !root.channelsLoaded
+                    visible:          root.channels.length === 0
                     anchors.centerIn: parent
                     spacing:          Style.marginM
 
@@ -227,7 +228,7 @@ Item {
                         pointSize: Style.fontSizeXL
 
                         RotationAnimation on rotation {
-                            running:  !root.channelsLoaded
+                            running:  root.channels.length === 0
                             from: 0; to: 360
                             duration: 1200
                             loops:    Animation.Infinite
@@ -245,7 +246,7 @@ Item {
                 }
 
                 NText {
-                    visible:          root.channelsLoaded && root.filteredChannels.length === 0
+                    visible:          root.channels.length > 0 && root.filteredChannels.length === 0
                     anchors.centerIn: parent
                     text:             "No channels match \"" + root.searchText + "\""
                     color:            Color.mOnSurfaceVariant
@@ -255,7 +256,7 @@ Item {
                 NScrollView {
                     anchors.fill:    parent
                     anchors.margins: Style.marginS
-                    visible:         root.channelsLoaded && root.filteredChannels.length > 0
+                    visible:         root.channels.length > 0 && root.filteredChannels.length > 0
 
                     ListView {
                         id:      channelList
@@ -278,5 +279,5 @@ Item {
         }
     }
 
-    Component.onCompleted: Logger.i("DIFM", "Panel opened")
+    Component.onCompleted: { Logger.i("DIFM", "Panel opened, channelsLoaded=" + root.channels.length > 0 + " channels=" + root.channels.length + " main=" + root.main) }
 }

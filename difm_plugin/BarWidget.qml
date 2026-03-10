@@ -66,6 +66,7 @@ Item {
 
             // Radio icon — pulses accent color while playing
             NIcon {
+                id:        radioIcon
                 icon:      "radio"
                 pointSize: root.barFontSize + 1
                 color:     root.isPlaying ? Color.mPrimary : Color.mOnSurfaceVariant
@@ -76,8 +77,8 @@ Item {
                     loops:    Animation.Infinite
                     NumberAnimation { to: 0.5; duration: 1200; easing.type: Easing.InOutSine }
                     NumberAnimation { to: 1.0; duration: 1200; easing.type: Easing.InOutSine }
+                    onRunningChanged: if (!running) radioIcon.opacity = 1.0
                 }
-                onRunningChanged: if (!root.isPlaying) opacity = 1.0
             }
 
             // Channel name

@@ -23,7 +23,6 @@ Item {
     readonly property string channelName:    main?.currentChannelName || ""
     readonly property string nowPlaying:     main?.nowPlayingText     || ""
     readonly property var    channels:       main?.channels           ?? []
-    readonly property bool   channelsLoaded: main?.channelsLoaded     ?? false
     readonly property bool   notConfigured:  !(pluginApi?.pluginSettings?.listenKey)
 
     property string searchText:  ""
@@ -38,8 +37,8 @@ Item {
         })
     }
 
-    onPluginApiChanged: Logger.i("DIFM", "pluginApi changed: " + pluginApi)
-    onMainChanged: { Logger.i("DIFM", "main changed, channelsLoaded=" + root.channels.length > 0 + " channels=" + (main?.channels?.length ?? -1))
+    onMainChanged: {
+        Logger.i("DIFM", "main changed, channels=" + (main?.channels?.length ?? -1))
         if (main) root.localVolume = main.volume
     }
 
@@ -216,6 +215,7 @@ Item {
                 radius: Style.radiusL
                 clip:   true
 
+                // Loading spinner
                 ColumnLayout {
                     visible:          root.channels.length === 0
                     anchors.centerIn: parent
@@ -229,7 +229,8 @@ Item {
 
                         RotationAnimation on rotation {
                             running:  root.channels.length === 0
-                            from: 0; to: 360
+                            from:     0
+                            to:       360
                             duration: 1200
                             loops:    Animation.Infinite
                         }
@@ -245,6 +246,7 @@ Item {
                     }
                 }
 
+                // No results
                 NText {
                     visible:          root.channels.length > 0 && root.filteredChannels.length === 0
                     anchors.centerIn: parent
@@ -253,6 +255,7 @@ Item {
                     pointSize:        Style.fontSizeS
                 }
 
+                // Channel list
                 NScrollView {
                     anchors.fill:    parent
                     anchors.margins: Style.marginS
@@ -279,5 +282,5 @@ Item {
         }
     }
 
-    Component.onCompleted: { Logger.i("DIFM", "Panel opened, channelsLoaded=" + root.channels.length > 0 + " channels=" + root.channels.length + " main=" + root.main) }
+    Component.onCompleted: Logger.i("DIFM", "Panel opened, channels=" + root.channels.length)
 }

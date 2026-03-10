@@ -116,7 +116,6 @@ Item {
 
                 NButton {
                     text:           root.isPlaying ? "Stop" : "Play"
-                    highlighted:    root.isPlaying
                     implicitWidth:  56
                     implicitHeight: 36
                     enabled: root.isPlaying || (root.channelsLoaded && (root.main?.currentChannelKey || "") !== "")

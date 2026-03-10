@@ -18,20 +18,27 @@ Item {
 
     anchors.fill: parent
 
-    readonly property var    main:           pluginApi?.mainInstance
-    readonly property bool   isPlaying:      main?.isPlaying         ?? false
-    readonly property string channelName:    main?.currentChannelName || ""
-    readonly property string nowPlaying:     main?.nowPlayingText     || ""
-    readonly property var    channels:       main?.channels           ?? []
-    readonly property bool   notConfigured:  !(pluginApi?.pluginSettings?.listenKey)
+    readonly property var    main:          pluginApi?.mainInstance
+    readonly property bool   isPlaying:     main?.isPlaying         ?? false
+    readonly property string channelName:   main?.currentChannelName || ""
+    readonly property string nowPlaying:    main?.nowPlayingText     || ""
+    readonly property var    channels:      main?.channels           ?? []
+    readonly property bool   notConfigured: !(pluginApi?.pluginSettings?.listenKey)
 
-    property string searchText:  ""
-    property int    localVolume: main?.volume ?? (pluginApi?.pluginSettings?.volume ?? 80)
+    property string searchText:      ""
+    property int    localVolume:     main?.volume ?? (pluginApi?.pluginSettings?.volume ?? 80)
+    property var    filteredChannels: []
 
-    readonly property var filteredChannels: {
+    onChannelsChanged:   updateFiltered()
+    onSearchTextChanged: updateFiltered()
+
+    function updateFiltered() {
         var q = root.searchText.toLowerCase().trim()
-        if (!q || !root.channels) return root.channels || []
-        return root.channels.filter(function(ch) {
+        if (!q || !root.channels || root.channels.length === 0) {
+            root.filteredChannels = root.channels || []
+            return
+        }
+        root.filteredChannels = root.channels.filter(function(ch) {
             return ch.name.toLowerCase().indexOf(q) >= 0 ||
                    ch.key.toLowerCase().indexOf(q) >= 0
         })
@@ -39,7 +46,10 @@ Item {
 
     onMainChanged: {
         Logger.i("DIFM", "main changed, channels=" + (main?.channels?.length ?? -1))
-        if (main) root.localVolume = main.volume
+        if (main) {
+            root.localVolume = main.volume
+            updateFiltered()
+        }
     }
 
     Rectangle {

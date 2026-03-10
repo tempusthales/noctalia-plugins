@@ -1,1 +1,3 @@
-# Noctalia Plugins\n\nPlugin collection for [Noctalia Shell](https://noctalia.dev).\n\n## Plugins\n\n- [difm](./difm) — DI.FM electronic music radio player
+[di.fm](https://di.fm) is an electronic music radio "station"  
+
+So I made a plugin for Noctalia so I could easily listen to my music without having to deal with browser issues.

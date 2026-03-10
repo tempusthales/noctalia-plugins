@@ -202,7 +202,6 @@ Item {
             NTextInput {
                 Layout.fillWidth: true
                 placeholderText:  "Search channels…"
-                icon:             "search"
                 text:             root.searchText
                 onTextChanged:    root.searchText = text
                 visible:          root.channelsLoaded

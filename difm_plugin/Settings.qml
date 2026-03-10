@@ -32,7 +32,6 @@ ColumnLayout {
         description:     "Your personal DI.FM Listen Key (from di.fm/settings). Required for premium streams."
         placeholderText: "e.g. abc123def456abc123"
         text:            root.editListenKey
-        echoMode:        TextInput.Password
         onTextChanged:   root.editListenKey = text
     }
 

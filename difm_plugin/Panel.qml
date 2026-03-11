@@ -25,8 +25,8 @@ Item {
     readonly property var    channels:      main?.channels           ?? []
     readonly property bool   notConfigured: !(pluginApi?.pluginSettings?.listenKey)
 
-    property string searchText:      ""
-    property int    localVolume:     main?.volume ?? (pluginApi?.pluginSettings?.volume ?? 80)
+    property string searchText:       ""
+    property int    localVolume:      main?.volume ?? (pluginApi?.pluginSettings?.volume ?? 80)
     property var    filteredChannels: []
 
     onChannelsChanged:   updateFiltered()
@@ -239,8 +239,7 @@ Item {
 
                         RotationAnimation on rotation {
                             running:  root.channels.length === 0
-                            from:     0
-                            to:       360
+                            from: 0; to: 360
                             duration: 1200
                             loops:    Animation.Infinite
                         }
@@ -265,26 +264,24 @@ Item {
                     pointSize:        Style.fontSizeS
                 }
 
-                // Channel list
-                NScrollView {
+                // Channel list — ListView directly, no ScrollView wrapper
+                // ListView is a Flickable and handles scrolling natively
+                ListView {
                     anchors.fill:    parent
                     anchors.margins: Style.marginS
-                    visible:         root.channels.length > 0 && root.filteredChannels.length > 0
+                    visible:         root.filteredChannels.length > 0
+                    model:           root.filteredChannels
+                    spacing:         2
+                    clip:            true
 
-                    ListView {
-                        id:      channelList
-                        model:   root.filteredChannels
-                        spacing: Style.marginXS
-
-                        delegate: Local.ChannelDelegate {
-                            width:         channelList.width
-                            channelData:   modelData
-                            isActive:      modelData.key === (root.main?.currentChannelKey || "")
-                            isPlayingThis: root.isPlaying && isActive
-                            nowPlaying:    root.nowPlaying
-                            onPlayRequested: function(key, name) {
-                                root.main?.playChannel(key, name)
-                            }
+                    delegate: Local.ChannelDelegate {
+                        width:         ListView.view.width
+                        channelData:   modelData
+                        isActive:      modelData.key === (root.main?.currentChannelKey || "")
+                        isPlayingThis: root.isPlaying && isActive
+                        nowPlaying:    isPlayingThis ? root.nowPlaying : ""
+                        onPlayRequested: function(key, name) {
+                            root.main?.playChannel(key, name)
                         }
                     }
                 }

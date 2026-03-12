@@ -105,14 +105,6 @@ Item {
         xhr.send()
     }
 
-    function killMpv() {
-        mpvProcess.running = false
-        var killer = Qt.createQmlObject(
-            'import Quickshell.Io; Process { command: ["/usr/bin/bash", "-c", "killall mpv 2>/dev/null || true"]; running: true }',
-            root, "mpvKiller"
-        )
-    }   
-
     function playChannel(channelKey, channelName) {
         var ch = null
         for (var i = 0; i < root.channels.length; i++) {
@@ -133,8 +125,8 @@ Item {
         var streamUrl = ch.playlist
         if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
 
-        // Kill previous stream including any orphaned mpv processes
-        root.killMpv()
+        // Stop previous stream directly — no bash, no orphans
+        mpvProcess.running = false
 
         root.currentChannelKey  = channelKey
         root.currentChannelName = channelName
@@ -145,8 +137,14 @@ Item {
         root._streamUrl         = streamUrl
 
         mpvProcess.command = [
-            "/usr/bin/bash", "-c",
-            "mpv --no-video --ao=pipewire --volume=" + root.volume + " '" + streamUrl + "' > /tmp/mpv-difm.log 2>&1"
+            "mpv",
+            "--no-video",
+            "--quiet",
+            "--really-quiet",
+            "--ao=pipewire",
+            "--volume=" + root.volume,
+            "--title=DI.FM: " + channelName,
+            streamUrl
         ]
         mpvProcess.running = true
         root.isPlaying = true
@@ -160,7 +158,7 @@ Item {
     }
 
     function stop() {
-        root.killMpv()
+        mpvProcess.running = false
         root.isPlaying = false
         root.currentTrackTitle = ""
         root.currentArtist     = ""
@@ -227,6 +225,4 @@ Item {
             }
         }
         xhr.open("GET", url)
-        xhr.send()
-    }
-}
+        xhr.send(

@@ -129,16 +129,16 @@ Item {
                     spacing: Style.marginXS
 
                     NButton {
-                        text:           "⏮"
-                        implicitWidth:  36
+                        text:           "Prev"
+                        implicitWidth:  48
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playPrev()
                     }
 
                     NButton {
-                        text:           root.isPlaying ? "⏹" : "▶"
-                        implicitWidth:  36
+                        text:           root.isPlaying ? "Stop" : "Play"
+                        implicitWidth:  48
                         implicitHeight: 36
                         enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
                         onClicked: {
@@ -154,8 +154,8 @@ Item {
                     }
 
                     NButton {
-                        text:           "⏭"
-                        implicitWidth:  36
+                        text:           "Next"
+                        implicitWidth:  48
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playNext()

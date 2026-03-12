@@ -124,21 +124,41 @@ Item {
                     }
                 }
 
-                NButton {
-                    text:           root.isPlaying ? "Stop" : "Play"
-                    implicitWidth:  56
-                    implicitHeight: 36
-                    enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
+                // ── Playback controls ───────────────────────────────────────
+                RowLayout {
+                    spacing: Style.marginXS
 
-                    onClicked: {
-                        if (root.isPlaying) {
-                            root.main?.stop()
-                        } else {
-                            root.main?.playChannel(
-                                root.main?.currentChannelKey  || pluginApi.pluginSettings.lastChannel,
-                                root.main?.currentChannelName || pluginApi.pluginSettings.lastChannelName
-                            )
+                    NButton {
+                        text:           "⏮"
+                        implicitWidth:  36
+                        implicitHeight: 36
+                        enabled:        root.channels.length > 0
+                        onClicked:      root.main?.playPrev()
+                    }
+
+                    NButton {
+                        text:           root.isPlaying ? "⏹" : "▶"
+                        implicitWidth:  36
+                        implicitHeight: 36
+                        enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
+                        onClicked: {
+                            if (root.isPlaying) {
+                                root.main?.stop()
+                            } else {
+                                root.main?.playChannel(
+                                    root.main?.currentChannelKey  || pluginApi.pluginSettings.lastChannel,
+                                    root.main?.currentChannelName || pluginApi.pluginSettings.lastChannelName
+                                )
+                            }
                         }
+                    }
+
+                    NButton {
+                        text:           "⏭"
+                        implicitWidth:  36
+                        implicitHeight: 36
+                        enabled:        root.channels.length > 0
+                        onClicked:      root.main?.playNext()
                     }
                 }
             }
@@ -225,7 +245,6 @@ Item {
                 radius: Style.radiusL
                 clip:   true
 
-                // Loading spinner
                 ColumnLayout {
                     visible:          root.channels.length === 0
                     anchors.centerIn: parent
@@ -255,7 +274,6 @@ Item {
                     }
                 }
 
-                // No results
                 NText {
                     visible:          root.channels.length > 0 && root.filteredChannels.length === 0
                     anchors.centerIn: parent
@@ -264,7 +282,6 @@ Item {
                     pointSize:        Style.fontSizeS
                 }
 
-                // Channel list
                 ListView {
                     anchors.fill:    parent
                     anchors.margins: Style.marginS

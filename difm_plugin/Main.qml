@@ -105,6 +105,16 @@ Item {
         xhr.send()
     }
 
+    function killMpv() {
+        // Kill bash wrapper AND any orphaned mpv processes
+        mpvProcess.running = false
+        // pkill catches orphaned mpv children left by bash wrapper
+        var killer = Qt.createQmlObject(
+            'import Quickshell.Io; Process { command: ["/usr/bin/bash", "-c", "pkill -f \'listen.di.fm\' 2>/dev/null || true"]; running: true }',
+            root, "mpvKiller"
+        )
+    }
+
     function playChannel(channelKey, channelName) {
         var ch = null
         for (var i = 0; i < root.channels.length; i++) {
@@ -125,9 +135,8 @@ Item {
         var streamUrl = ch.playlist
         if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
 
-        if (mpvProcess.running) {
-            mpvProcess.running = false
-        }
+        // Kill previous stream including any orphaned mpv processes
+        root.killMpv()
 
         root.currentChannelKey  = channelKey
         root.currentChannelName = channelName
@@ -137,7 +146,6 @@ Item {
         root.nowPlayingText     = ""
         root._streamUrl         = streamUrl
 
-        // Debug: capture mpv output to log file
         mpvProcess.command = [
             "/usr/bin/bash", "-c",
             "mpv --no-video --ao=pipewire --volume=" + root.volume + " '" + streamUrl + "' > /tmp/mpv-difm.log 2>&1"
@@ -154,14 +162,38 @@ Item {
     }
 
     function stop() {
-        if (mpvProcess.running) {
-            mpvProcess.running = false
-        }
+        root.killMpv()
         root.isPlaying = false
         root.currentTrackTitle = ""
         root.currentArtist     = ""
         root.nowPlayingText    = ""
         Logger.i("DIFM", "Stopped")
+    }
+
+    function playNext() {
+        if (root.channels.length === 0) return
+        var idx = 0
+        for (var i = 0; i < root.channels.length; i++) {
+            if (root.channels[i].key === root.currentChannelKey) {
+                idx = (i + 1) % root.channels.length
+                break
+            }
+        }
+        var ch = root.channels[idx]
+        root.playChannel(ch.key, ch.name)
+    }
+
+    function playPrev() {
+        if (root.channels.length === 0) return
+        var idx = 0
+        for (var i = 0; i < root.channels.length; i++) {
+            if (root.channels[i].key === root.currentChannelKey) {
+                idx = (i - 1 + root.channels.length) % root.channels.length
+                break
+            }
+        }
+        var ch = root.channels[idx]
+        root.playChannel(ch.key, ch.name)
     }
 
     function setVolume(newVolume) {

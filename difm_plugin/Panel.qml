@@ -75,7 +75,7 @@ Item {
                     NText {
                         anchors.centerIn: parent
                         text:        "DI"
-                        color:       Color.mOnPrimary
+                        color:       Color.mOnSurface
                         pointSize:   Style.fontSizeM
                         font.weight: Font.Bold
                     }
@@ -108,7 +108,7 @@ Item {
                     NText {
                         visible:   !root.isPlaying && root.channels.length === 0
                         text:      root.notConfigured ? "Set your Listen Key in plugin settings" : "No channels loaded"
-                        color:     root.notConfigured ? Color.mError : Color.mOnSurfaceVariant
+                        color:     Color.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                         wrapMode:  Text.WordWrap
                         Layout.fillWidth: true
@@ -264,8 +264,7 @@ Item {
                     pointSize:        Style.fontSizeS
                 }
 
-                // Channel list — ListView directly, no ScrollView wrapper
-                // ListView is a Flickable and handles scrolling natively
+                // Channel list
                 ListView {
                     anchors.fill:    parent
                     anchors.margins: Style.marginS

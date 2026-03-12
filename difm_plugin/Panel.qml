@@ -129,22 +129,17 @@ Item {
                     spacing: Style.marginXS
 
                     NButton {
-                        implicitWidth:  36
+                        text:           "|<<"
+                        implicitWidth:  44
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playPrev()
-
-                        NIcon {
-                            anchors.centerIn: parent
-                            icon:      "player-skip-back"
-                            color:     Color.mOnSurface
-                            pointSize: Style.fontSizeM
-                        }
                     }
 
                     NButton {
-                        implicitWidth:  44
-                        implicitHeight: 44
+                        text:           root.isPlaying ? "Stop" : "Play"
+                        implicitWidth:  56
+                        implicitHeight: 36
                         enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
                         onClicked: {
                             if (root.isPlaying) {
@@ -156,27 +151,14 @@ Item {
                                 )
                             }
                         }
-
-                        NIcon {
-                            anchors.centerIn: parent
-                            icon:      root.isPlaying ? "player-stop" : "player-play"
-                            color:     Color.mOnSurface
-                            pointSize: Style.fontSizeL
-                        }
                     }
 
                     NButton {
-                        implicitWidth:  36
+                        text:           ">>|"
+                        implicitWidth:  44
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playNext()
-
-                        NIcon {
-                            anchors.centerIn: parent
-                            icon:      "player-skip-forward"
-                            color:     Color.mOnSurface
-                            pointSize: Style.fontSizeM
-                        }
                     }
                 }
 

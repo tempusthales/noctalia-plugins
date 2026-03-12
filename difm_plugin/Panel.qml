@@ -124,22 +124,27 @@ Item {
                     }
                 }
 
-                // ── Playback controls ───────────────────────────────────────
+            // ── Playback controls ───────────────────────────────────────
                 RowLayout {
                     spacing: Style.marginXS
 
                     NButton {
-                        text:           "Prev"
-                        implicitWidth:  48
+                        implicitWidth:  36
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playPrev()
+
+                        NIcon {
+                            anchors.centerIn: parent
+                            icon:      "player-skip-back"
+                            color:     Color.mOnSurface
+                            pointSize: Style.fontSizeM
+                        }
                     }
 
                     NButton {
-                        text:           root.isPlaying ? "Stop" : "Play"
-                        implicitWidth:  48
-                        implicitHeight: 36
+                        implicitWidth:  44
+                        implicitHeight: 44
                         enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
                         onClicked: {
                             if (root.isPlaying) {
@@ -151,17 +156,29 @@ Item {
                                 )
                             }
                         }
+
+                        NIcon {
+                            anchors.centerIn: parent
+                            icon:      root.isPlaying ? "player-stop" : "player-play"
+                            color:     Color.mOnSurface
+                            pointSize: Style.fontSizeL
+                        }
                     }
 
                     NButton {
-                        text:           "Next"
-                        implicitWidth:  48
+                        implicitWidth:  36
                         implicitHeight: 36
                         enabled:        root.channels.length > 0
                         onClicked:      root.main?.playNext()
+
+                        NIcon {
+                            anchors.centerIn: parent
+                            icon:      "player-skip-forward"
+                            color:     Color.mOnSurface
+                            pointSize: Style.fontSizeM
+                        }
                     }
                 }
-            }
 
             // ── Volume ─────────────────────────────────────────────────────
             RowLayout {

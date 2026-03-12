@@ -106,14 +106,12 @@ Item {
     }
 
     function killMpv() {
-        // Kill bash wrapper AND any orphaned mpv processes
         mpvProcess.running = false
-        // pkill catches orphaned mpv children left by bash wrapper
         var killer = Qt.createQmlObject(
-            'import Quickshell.Io; Process { command: ["/usr/bin/bash", "-c", "pkill -f \'listen.di.fm\' 2>/dev/null || true"]; running: true }',
+            'import Quickshell.Io; Process { command: ["/usr/bin/bash", "-c", "killall mpv 2>/dev/null || true"]; running: true }',
             root, "mpvKiller"
         )
-    }
+    }   
 
     function playChannel(channelKey, channelName) {
         var ch = null

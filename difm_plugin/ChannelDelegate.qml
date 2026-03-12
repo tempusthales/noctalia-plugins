@@ -5,26 +5,21 @@ import qs.Widgets
 
 Rectangle {
     id: delegate
-
     property var    channelData:   ({})
     property bool   isActive:      false
     property bool   isPlayingThis: false
     property string nowPlaying:    ""
-
     signal playRequested(string key, string name)
-
     height: 52
     color: {
-        if (isActive)                    return Color.mSecondaryContainer
-        if (delegateMouse.containsMouse) return Color.mSurface
+        if (isActive)                    return Color.mSurfaceVariant
+        if (delegateMouse.containsMouse) return Qt.rgba(1, 1, 1, 0.05)
         return "transparent"
     }
     radius: Style.radiusM
-
     RowLayout {
         anchors { fill: parent; leftMargin: Style.marginM; rightMargin: Style.marginM }
         spacing: Style.marginM
-
         Rectangle {
             width:  6
             height: 32
@@ -36,46 +31,40 @@ Rectangle {
                 return Qt.hsva((h % 360) / 360, 0.7, 0.85, 1)
             }
         }
-
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 2
-
             NText {
                 text:        delegate.channelData.name || ""
-                color:       delegate.isActive ? Color.mOnSecondaryContainer : Color.mOnSurface
+                color:       delegate.isActive ? Color.mOnSurfaceVariant : Color.mOnSurfaceVariant
                 pointSize:   Style.fontSizeS
                 font.weight: delegate.isActive ? Font.Medium : Font.Normal
                 elide:       Text.ElideRight
                 Layout.fillWidth: true
             }
-
             NText {
                 visible:   !delegate.isPlayingThis && (delegate.channelData.description || "") !== ""
                 text:      delegate.channelData.description || ""
-                color:     delegate.isActive ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                color:     Color.mOnSurfaceVariant
                 pointSize: Style.fontSizeXS
                 elide:     Text.ElideRight
                 Layout.fillWidth: true
             }
-
             NText {
                 visible:   delegate.isPlayingThis && delegate.nowPlaying !== ""
                 text:      "▶  " + delegate.nowPlaying
-                color:     Color.mPrimary
+                color:     Color.mOnSurfaceVariant
                 pointSize: Style.fontSizeXS
                 elide:     Text.ElideRight
                 Layout.fillWidth: true
             }
         }
-
         NIcon {
             visible:   delegate.isPlayingThis
             icon:      "player-play"
-            color:     Color.mPrimary
+            color:     Color.mOnSurfaceVariant
             pointSize: Style.fontSizeM
         }
-
         NIcon {
             visible:   !delegate.isPlayingThis && delegateMouse.containsMouse
             icon:      "player-play"
@@ -83,7 +72,6 @@ Rectangle {
             pointSize: Style.fontSizeM
         }
     }
-
     MouseArea {
         id:           delegateMouse
         anchors.fill: parent

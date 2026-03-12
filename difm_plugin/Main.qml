@@ -133,17 +133,13 @@ Item {
             return
         }
 
-        var streamUrl
-        var streams = ch.streams
-        if (streams && streams.length > 0) {
-            streamUrl = streams[0].url
-            if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
-        } else {
-            // Construct URL from channel key (premium_high.json omits stream URLs)
-            var quality = root.listenKey ? (root.quality || "premium_high") : "public3"
-            streamUrl = "https://stream.di.fm/" + quality + "/" + channelKey
-            if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
+        if (!ch.playlist) {
+            Logger.w("DIFM", "No playlist URL for channel:", channelKey)
+            return
         }
+
+        var streamUrl = ch.playlist
+        if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
 
         if (mpvProcess.running) {
             mpvProcess.running = false

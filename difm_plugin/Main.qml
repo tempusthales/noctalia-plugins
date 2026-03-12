@@ -43,6 +43,12 @@ Item {
         }
     }
 
+    Process {
+        id: mpvKiller
+        running: false
+        command: ["/usr/bin/pkill", "-f", "listen.di.fm"]
+    }
+
     Timer {
         id: nowPlayingTimer
         interval: 45000
@@ -161,9 +167,8 @@ Item {
 
     function stop() {
         mpvProcess.running = false
-        var killer = Qt.createQmlObject(
-            'import Quickshell.Io; Process { command: ["/usr/bin/pkill", "-f", "listen.di.fm"]; running: true }',
-            root, "mpvKiller")
+        mpvKiller.running = false
+        mpvKiller.running = true
         root.isPlaying = false
         root.currentTrackTitle = ""
         root.currentArtist     = ""

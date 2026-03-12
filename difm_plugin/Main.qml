@@ -139,8 +139,8 @@ Item {
 
         // Debug: capture mpv output to log file
         mpvProcess.command = [
-            "bash", "-c",
-            "mpv --no-video --ao=pipewire --quiet --really-quiet --volume=" + root.volume + " '" + streamUrl + "' > /tmp/mpv-difm.log 2>&1"
+            "/usr/bin/bash", "-c",
+            "mpv --no-video --ao=pipewire --volume=" + root.volume + " '" + streamUrl + "' > /tmp/mpv-difm.log 2>&1"
         ]
         mpvProcess.running = true
         root.isPlaying = true

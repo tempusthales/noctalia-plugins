@@ -30,12 +30,13 @@ Item {
     property int    volume:             80
 
     property string _streamUrl: ""
+    property bool   _intentionalStop: false
 
     Process {
         id: mpvProcess
         running: false
         onRunningChanged: {
-            if (!running && root.isPlaying) {
+            if (!running && root.isPlaying && !root._intentionalStop) {
                 root.isPlaying = false
                 Logger.w("DIFM", "mpv process stopped unexpectedly")
             }
@@ -125,9 +126,9 @@ Item {
         var streamUrl = ch.playlist
         if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
 
-        if (mpvProcess.running) {
-            mpvProcess.running = false
-        }
+        root._intentionalStop = true
+        mpvProcess.running = false
+        root._intentionalStop = false
 
         root.currentChannelKey  = channelKey
         root.currentChannelName = channelName

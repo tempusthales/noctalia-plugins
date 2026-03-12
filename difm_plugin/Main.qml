@@ -17,18 +17,14 @@ Item {
     property var    channels:           []
     property bool   channelsLoaded:     false
     property bool   channelsLoading:    false
-
     property string currentChannelKey:  ""
     property string currentChannelName: ""
     property int    currentChannelId:   -1
-
     property string currentTrackTitle:  ""
     property string currentArtist:      ""
     property string nowPlayingText:     ""
-
     property bool   isPlaying:          false
     property int    volume:             80
-
     property string _streamUrl: ""
 
     Process {
@@ -62,27 +58,18 @@ Item {
         root.volume = root.savedVolume
         root.currentChannelKey  = root.lastChannel
         root.currentChannelName = root.lastChannelName
-        Logger.i("DIFM", "Plugin loaded. quality:", root.quality,
-                 "hasKey:", root.listenKey !== "")
+        Logger.i("DIFM", "Plugin loaded. quality:", root.quality, "hasKey:", root.listenKey !== "")
         root.loadChannels()
     }
 
-    onListenKeyChanged: {
-        if (root.listenKey) root.loadChannels()
-    }
-    onQualityChanged: {
-        root.loadChannels()
-    }
+    onListenKeyChanged: { if (root.listenKey) root.loadChannels() }
+    onQualityChanged:   { root.loadChannels() }
 
     function loadChannels() {
         if (root.channelsLoading) return
-
-        var qualityPath = root.quality
-        if (!root.listenKey) qualityPath = "public3"
-
+        var qualityPath = root.listenKey ? root.quality : "public3"
         var url = "https://listen.di.fm/" + qualityPath + ".json"
         Logger.i("DIFM", "Loading channels from:", url)
-
         root.channelsLoading = true
         var xhr = new XMLHttpRequest()
         xhr.onreadystatechange = function() {
@@ -108,26 +95,13 @@ Item {
     function playChannel(channelKey, channelName) {
         var ch = null
         for (var i = 0; i < root.channels.length; i++) {
-            if (root.channels[i].key === channelKey) {
-                ch = root.channels[i]
-                break
-            }
+            if (root.channels[i].key === channelKey) { ch = root.channels[i]; break }
         }
-        if (!ch) {
-            Logger.w("DIFM", "Channel not found:", channelKey)
-            return
-        }
-        if (!ch.playlist) {
-            Logger.w("DIFM", "No playlist URL for channel:", channelKey)
-            return
-        }
-
+        if (!ch) { Logger.w("DIFM", "Channel not found:", channelKey); return }
+        if (!ch.playlist) { Logger.w("DIFM", "No playlist for:", channelKey); return }
         var streamUrl = ch.playlist
         if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
-
-        // Stop previous stream directly — no bash, no orphans
         mpvProcess.running = false
-
         root.currentChannelKey  = channelKey
         root.currentChannelName = channelName
         root.currentChannelId   = ch.id || -1
@@ -135,25 +109,15 @@ Item {
         root.currentArtist      = ""
         root.nowPlayingText     = ""
         root._streamUrl         = streamUrl
-
-        mpvProcess.command = [
-            "mpv",
-            "--no-video",
-            "--quiet",
-            "--really-quiet",
-            "--ao=pipewire",
-            "--volume=" + root.volume,
-            "--title=DI.FM: " + channelName,
-            streamUrl
-        ]
+        mpvProcess.command = ["mpv", "--no-video", "--quiet", "--really-quiet",
+            "--ao=pipewire", "--volume=" + root.volume,
+            "--title=DI.FM: " + channelName, streamUrl]
         mpvProcess.running = true
         root.isPlaying = true
-
         pluginApi.pluginSettings.lastChannel     = channelKey
         pluginApi.pluginSettings.lastChannelName = channelName
         pluginApi.saveSettings()
-
-        Logger.i("DIFM", "Playing:", channelName, "→", streamUrl)
+        Logger.i("DIFM", "Playing:", channelName, "->", streamUrl)
         nowPlayingDelayTimer.restart()
     }
 
@@ -170,35 +134,25 @@ Item {
         if (root.channels.length === 0) return
         var idx = 0
         for (var i = 0; i < root.channels.length; i++) {
-            if (root.channels[i].key === root.currentChannelKey) {
-                idx = (i + 1) % root.channels.length
-                break
-            }
+            if (root.channels[i].key === root.currentChannelKey) { idx = (i + 1) % root.channels.length; break }
         }
-        var ch = root.channels[idx]
-        root.playChannel(ch.key, ch.name)
+        root.playChannel(root.channels[idx].key, root.channels[idx].name)
     }
 
     function playPrev() {
         if (root.channels.length === 0) return
         var idx = 0
         for (var i = 0; i < root.channels.length; i++) {
-            if (root.channels[i].key === root.currentChannelKey) {
-                idx = (i - 1 + root.channels.length) % root.channels.length
-                break
-            }
+            if (root.channels[i].key === root.currentChannelKey) { idx = (i - 1 + root.channels.length) % root.channels.length; break }
         }
-        var ch = root.channels[idx]
-        root.playChannel(ch.key, ch.name)
+        root.playChannel(root.channels[idx].key, root.channels[idx].name)
     }
 
     function setVolume(newVolume) {
         root.volume = newVolume
         pluginApi.pluginSettings.volume = newVolume
         pluginApi.saveSettings()
-        if (root.isPlaying && root._streamUrl !== "") {
-            root.playChannel(root.currentChannelKey, root.currentChannelName)
-        }
+        if (root.isPlaying) root.playChannel(root.currentChannelKey, root.currentChannelName)
     }
 
     function fetchNowPlaying() {
@@ -212,11 +166,9 @@ Item {
                     var data = JSON.parse(xhr.responseText)
                     if (data && data.length > 0 && data[0].track) {
                         var track = data[0].track
-                        root.currentTrackTitle = track.title        || ""
+                        root.currentTrackTitle = track.title || ""
                         root.currentArtist     = track.artist_title || ""
-                        root.nowPlayingText    = root.currentArtist
-                            ? root.currentArtist + " — " + root.currentTrackTitle
-                            : root.currentTrackTitle
+                        root.nowPlayingText = root.currentArtist ? root.currentArtist + " - " + root.currentTrackTitle : root.currentTrackTitle
                         Logger.i("DIFM", "Now playing:", root.nowPlayingText)
                     }
                 } catch (e) {
@@ -226,3 +178,8 @@ Item {
         }
         xhr.open("GET", url)
         xhr.send()
+    }
+}
+
+    }
+}

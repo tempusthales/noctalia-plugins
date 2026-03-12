@@ -124,7 +124,7 @@ Item {
                     }
                 }
 
-            // ── Playback controls ───────────────────────────────────────
+                // ── Playback controls ───────────────────────────────────────
                 RowLayout {
                     spacing: Style.marginXS
 
@@ -161,6 +161,7 @@ Item {
                         onClicked:      root.main?.playNext()
                     }
                 }
+            }
 
             // ── Volume ─────────────────────────────────────────────────────
             RowLayout {

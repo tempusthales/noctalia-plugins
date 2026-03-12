@@ -143,6 +143,7 @@ Item {
             "--quiet",
             "--really-quiet",
             "--ao=pipewire",
+            "--ao=pipewire",
             "--volume=" + root.volume,
             "--title=DI.FM: " + channelName,
             streamUrl

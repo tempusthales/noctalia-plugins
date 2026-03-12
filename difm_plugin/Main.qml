@@ -225,4 +225,4 @@ Item {
             }
         }
         xhr.open("GET", url)
-        xhr.send(
+        xhr.send()

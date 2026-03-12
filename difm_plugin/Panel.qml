@@ -125,40 +125,20 @@ Item {
                 }
 
                 // ── Playback controls ───────────────────────────────────────
-                RowLayout {
-                    spacing: Style.marginXS
-
-                    NButton {
-                        text:           "|<<"
-                        implicitWidth:  44
-                        implicitHeight: 36
-                        enabled:        root.channels.length > 0
-                        onClicked:      root.main?.playPrev()
-                    }
-
-                    NButton {
-                        text:           root.isPlaying ? "Stop" : "Play"
-                        implicitWidth:  56
-                        implicitHeight: 36
-                        enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
-                        onClicked: {
-                            if (root.isPlaying) {
-                                root.main?.stop()
-                            } else {
-                                root.main?.playChannel(
-                                    root.main?.currentChannelKey  || pluginApi.pluginSettings.lastChannel,
-                                    root.main?.currentChannelName || pluginApi.pluginSettings.lastChannelName
-                                )
-                            }
+                NButton {
+                    text:           root.isPlaying ? "Stop" : "Play"
+                    implicitWidth:  64
+                    implicitHeight: 36
+                    enabled: root.isPlaying || (root.channels.length > 0 && (root.main?.currentChannelKey || "") !== "")
+                    onClicked: {
+                        if (root.isPlaying) {
+                            root.main?.stop()
+                        } else {
+                            root.main?.playChannel(
+                                root.main?.currentChannelKey  || pluginApi.pluginSettings.lastChannel,
+                                root.main?.currentChannelName || pluginApi.pluginSettings.lastChannelName
+                            )
                         }
-                    }
-
-                    NButton {
-                        text:           ">>|"
-                        implicitWidth:  44
-                        implicitHeight: 36
-                        enabled:        root.channels.length > 0
-                        onClicked:      root.main?.playNext()
                     }
                 }
             }

@@ -160,9 +160,10 @@ Item {
     }
 
     function stop() {
-        if (mpvProcess.running) {
-            mpvProcess.running = false
-        }
+        mpvProcess.running = false
+        var killer = Qt.createQmlObject(
+            'import Quickshell.Io; Process { command: ["/usr/bin/pkill", "-f", "listen.di.fm"]; running: true }',
+            root, "mpvKiller")
         root.isPlaying = false
         root.currentTrackTitle = ""
         root.currentArtist     = ""

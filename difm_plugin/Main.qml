@@ -20,7 +20,7 @@ Item {
     readonly property string lastChannelName: pluginApi?.pluginSettings?.lastChannelName || ""
 
     // ── Public state (read by BarWidget + Panel) ───────────────────────────
-    property var    channels:           []          // JS array of channel objects
+    property var    channels:           []
     property bool   channelsLoaded:     false
     property bool   channelsLoading:    false
 
@@ -43,7 +43,6 @@ Item {
         id: mpvProcess
         running: false
 
-        // mpv exits on stream error; mark as not playing
         onRunningChanged: {
             if (!running && root.isPlaying) {
                 root.isPlaying = false
@@ -58,6 +57,15 @@ Item {
         interval: 45000
         repeat:   true
         running:  root.isPlaying && root.currentChannelId >= 0
+        onTriggered: root.fetchNowPlaying()
+    }
+
+    // ── Delayed now-playing fetch after channel starts ─────────────────────
+    Timer {
+        id: nowPlayingDelayTimer
+        interval: 3000
+        repeat:   false
+        running:  false
         onTriggered: root.fetchNowPlaying()
     }
 
@@ -84,7 +92,6 @@ Item {
         if (root.channelsLoading) return
 
         var qualityPath = root.quality
-        // Free listeners get public3 (40 kbps), no listen key required
         if (!root.listenKey) qualityPath = "public3"
 
         var url = "https://listen.di.fm/" + qualityPath + ".json"
@@ -113,10 +120,7 @@ Item {
     }
 
     // ── Playback ───────────────────────────────────────────────────────────
-
-    // Play a channel by its key (slug).  channelName is display name.
     function playChannel(channelKey, channelName) {
-        // Find the channel object to get stream URL + ID
         var ch = null
         for (var i = 0; i < root.channels.length; i++) {
             if (root.channels[i].key === channelKey) {
@@ -129,18 +133,18 @@ Item {
             return
         }
 
+        var streamUrl
         var streams = ch.streams
-        if (!streams || streams.length === 0) {
-            Logger.w("DIFM", "No streams for channel:", channelKey)
-            return
+        if (streams && streams.length > 0) {
+            streamUrl = streams[0].url
+            if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
+        } else {
+            // Construct URL from channel key (premium_high.json omits stream URLs)
+            var quality = root.listenKey ? (root.quality || "premium_high") : "public3"
+            streamUrl = "https://stream.di.fm/" + quality + "/" + channelKey
+            if (root.listenKey) streamUrl += "?listen_key=" + root.listenKey
         }
 
-        var streamUrl = streams[0].url
-        if (root.listenKey) {
-            streamUrl += "?listen_key=" + root.listenKey
-        }
-
-        // Stop any current playback
         if (mpvProcess.running) {
             mpvProcess.running = false
         }
@@ -153,7 +157,6 @@ Item {
         root.nowPlayingText     = ""
         root._streamUrl         = streamUrl
 
-        // Launch mpv
         mpvProcess.command = [
             "mpv",
             "--no-video",
@@ -166,17 +169,14 @@ Item {
         mpvProcess.running = true
         root.isPlaying = true
 
-        // Persist last channel
         pluginApi.pluginSettings.lastChannel     = channelKey
         pluginApi.pluginSettings.lastChannelName = channelName
         pluginApi.saveSettings()
 
         Logger.i("DIFM", "Playing:", channelName, "→", streamUrl)
 
-        // Fetch track info after a short delay (stream needs to negotiate)
-        Qt.callLater(function() {
-            Qt.createQmlObject('import QtQuick; Timer { interval: 3000; running: true; repeat: false; onTriggered: { root.fetchNowPlaying(); destroy() } }', root)
-        })
+        // Fetch track info after stream negotiates
+        nowPlayingDelayTimer.restart()
     }
 
     function stop() {
@@ -190,17 +190,14 @@ Item {
         Logger.i("DIFM", "Stopped")
     }
 
-    // Change volume — restarts the stream to apply (mpv limitation via Process)
+    // Change volume — restarts stream to apply (mpv Process limitation)
     function setVolume(newVolume) {
         root.volume = newVolume
         pluginApi.pluginSettings.volume = newVolume
         pluginApi.saveSettings()
 
-        // Restart stream with new volume if currently playing
         if (root.isPlaying && root._streamUrl !== "") {
-            var key  = root.currentChannelKey
-            var name = root.currentChannelName
-            root.playChannel(key, name)
+            root.playChannel(root.currentChannelKey, root.currentChannelName)
         }
     }
 
@@ -216,12 +213,12 @@ Item {
                     var data = JSON.parse(xhr.responseText)
                     if (data && data.length > 0 && data[0].track) {
                         var track = data[0].track
-                        root.currentTrackTitle = track.title       || ""
+                        root.currentTrackTitle = track.title        || ""
                         root.currentArtist     = track.artist_title || ""
                         root.nowPlayingText    = root.currentArtist
                             ? root.currentArtist + " — " + root.currentTrackTitle
                             : root.currentTrackTitle
-                        Logger.d("DIFM", "Now playing:", root.nowPlayingText)
+                        Logger.i("DIFM", "Now playing:", root.nowPlayingText)
                     }
                 } catch (e) {
                     Logger.w("DIFM", "Failed to parse track history:", e)

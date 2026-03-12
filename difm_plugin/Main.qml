@@ -137,16 +137,10 @@ Item {
         root.nowPlayingText     = ""
         root._streamUrl         = streamUrl
 
+        // Debug: capture mpv output to log file
         mpvProcess.command = [
-            "mpv",
-            "--no-video",
-            "--quiet",
-            "--really-quiet",
-            "--ao=pipewire",
-            "--ao=pipewire",
-            "--volume=" + root.volume,
-            "--title=DI.FM: " + channelName,
-            streamUrl
+            "bash", "-c",
+            "mpv --no-video --ao=pipewire --quiet --really-quiet --volume=" + root.volume + " '" + streamUrl + "' > /tmp/mpv-difm.log 2>&1"
         ]
         mpvProcess.running = true
         root.isPlaying = true

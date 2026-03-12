@@ -181,18 +181,18 @@ Item {
                 visible:          root.notConfigured
                 Layout.fillWidth: true
                 height:           52
-                color:            Color.mErrorContainer
+                color:            Color.mSurfaceVariant
                 radius:           Style.radiusM
 
                 RowLayout {
                     anchors { fill: parent; margins: Style.marginM }
                     spacing: Style.marginS
 
-                    NIcon { icon: "alert-circle"; color: Color.mOnErrorContainer; pointSize: Style.fontSizeM }
+                    NIcon { icon: "alert-circle"; color: Color.mOnSurface; pointSize: Style.fontSizeM }
 
                     NText {
                         text:             "Add your DI.FM Listen Key in Settings to stream."
-                        color:            Color.mOnErrorContainer
+                        color:            Color.mOnSurface
                         pointSize:        Style.fontSizeS
                         wrapMode:         Text.WordWrap
                         Layout.fillWidth: true

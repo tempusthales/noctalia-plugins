@@ -3,23 +3,17 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 
-// Main.qml — Background component
-// Manages the mpv player process, channel list, and now-playing metadata.
-// All other components access state via pluginApi.mainInstance.
 Item {
     id: root
 
-    // ── Plugin API ─────────────────────────────────────────────────────────
     property var pluginApi: null
 
-    // ── Settings helpers ───────────────────────────────────────────────────
     readonly property string listenKey:       pluginApi?.pluginSettings?.listenKey       || ""
     readonly property string quality:         pluginApi?.pluginSettings?.quality         || "premium_high"
     readonly property int    savedVolume:     pluginApi?.pluginSettings?.volume          ?? 80
     readonly property string lastChannel:     pluginApi?.pluginSettings?.lastChannel     || ""
     readonly property string lastChannelName: pluginApi?.pluginSettings?.lastChannelName || ""
 
-    // ── Public state (read by BarWidget + Panel) ───────────────────────────
     property var    channels:           []
     property bool   channelsLoaded:     false
     property bool   channelsLoading:    false
@@ -30,19 +24,16 @@ Item {
 
     property string currentTrackTitle:  ""
     property string currentArtist:      ""
-    property string nowPlayingText:     ""          // "Artist — Title" combined
+    property string nowPlayingText:     ""
 
     property bool   isPlaying:          false
     property int    volume:             80
 
-    // ── Internal: stream URL being played ─────────────────────────────────
     property string _streamUrl: ""
 
-    // ── mpv process ────────────────────────────────────────────────────────
     Process {
         id: mpvProcess
         running: false
-
         onRunningChanged: {
             if (!running && root.isPlaying) {
                 root.isPlaying = false
@@ -51,7 +42,6 @@ Item {
         }
     }
 
-    // ── Now-playing poll (every 45 s while playing) ────────────────────────
     Timer {
         id: nowPlayingTimer
         interval: 45000
@@ -60,7 +50,6 @@ Item {
         onTriggered: root.fetchNowPlaying()
     }
 
-    // ── Delayed now-playing fetch after channel starts ─────────────────────
     Timer {
         id: nowPlayingDelayTimer
         interval: 3000
@@ -69,7 +58,6 @@ Item {
         onTriggered: root.fetchNowPlaying()
     }
 
-    // ── Initialization ─────────────────────────────────────────────────────
     Component.onCompleted: {
         root.volume = root.savedVolume
         root.currentChannelKey  = root.lastChannel
@@ -79,7 +67,6 @@ Item {
         root.loadChannels()
     }
 
-    // ── Reload channels when settings change ──────────────────────────────
     onListenKeyChanged: {
         if (root.listenKey) root.loadChannels()
     }
@@ -87,7 +74,6 @@ Item {
         root.loadChannels()
     }
 
-    // ── Channel loading ────────────────────────────────────────────────────
     function loadChannels() {
         if (root.channelsLoading) return
 
@@ -119,7 +105,6 @@ Item {
         xhr.send()
     }
 
-    // ── Playback ───────────────────────────────────────────────────────────
     function playChannel(channelKey, channelName) {
         var ch = null
         for (var i = 0; i < root.channels.length; i++) {
@@ -132,7 +117,6 @@ Item {
             Logger.w("DIFM", "Channel not found:", channelKey)
             return
         }
-
         if (!ch.playlist) {
             Logger.w("DIFM", "No playlist URL for channel:", channelKey)
             return
@@ -158,6 +142,7 @@ Item {
             "--no-video",
             "--quiet",
             "--really-quiet",
+            "--ao=pipewire",
             "--volume=" + root.volume,
             "--title=DI.FM: " + channelName,
             streamUrl
@@ -170,8 +155,6 @@ Item {
         pluginApi.saveSettings()
 
         Logger.i("DIFM", "Playing:", channelName, "→", streamUrl)
-
-        // Fetch track info after stream negotiates
         nowPlayingDelayTimer.restart()
     }
 
@@ -186,18 +169,15 @@ Item {
         Logger.i("DIFM", "Stopped")
     }
 
-    // Change volume — restarts stream to apply (mpv Process limitation)
     function setVolume(newVolume) {
         root.volume = newVolume
         pluginApi.pluginSettings.volume = newVolume
         pluginApi.saveSettings()
-
         if (root.isPlaying && root._streamUrl !== "") {
             root.playChannel(root.currentChannelKey, root.currentChannelName)
         }
     }
 
-    // ── Now-playing fetch ─────────────────────────────────────────────────
     function fetchNowPlaying() {
         if (root.currentChannelId < 0) return
         var url = "https://api.audioaddict.com/v1/di/track_history/channel/" + root.currentChannelId

@@ -12,8 +12,8 @@ Rectangle {
     signal playRequested(string key, string name)
     height: 52
     color: {
-        if (isActive)                    return Color.mSurfaceVariant
-        if (delegateMouse.containsMouse) return Qt.rgba(1, 1, 1, 0.05)
+        if (isActive)                    return Color.mSecondary
+        if (delegateMouse.containsMouse) return Color.mSurfaceVariant
         return "transparent"
     }
     radius: Style.radiusM
@@ -36,7 +36,7 @@ Rectangle {
             spacing: 2
             NText {
                 text:        delegate.channelData.name || ""
-                color:       delegate.isActive ? Color.mOnSurfaceVariant : Color.mOnSurfaceVariant
+                color:       Color.mOnSurface
                 pointSize:   Style.fontSizeS
                 font.weight: delegate.isActive ? Font.Medium : Font.Normal
                 elide:       Text.ElideRight
@@ -45,7 +45,7 @@ Rectangle {
             NText {
                 visible:   !delegate.isPlayingThis && (delegate.channelData.description || "") !== ""
                 text:      delegate.channelData.description || ""
-                color:     Color.mOnSurfaceVariant
+                color:     Color.mOnSurface
                 pointSize: Style.fontSizeXS
                 elide:     Text.ElideRight
                 Layout.fillWidth: true
@@ -53,7 +53,7 @@ Rectangle {
             NText {
                 visible:   delegate.isPlayingThis && delegate.nowPlaying !== ""
                 text:      "▶  " + delegate.nowPlaying
-                color:     Color.mOnSurfaceVariant
+                color:     Color.mPrimary
                 pointSize: Style.fontSizeXS
                 elide:     Text.ElideRight
                 Layout.fillWidth: true
@@ -62,13 +62,13 @@ Rectangle {
         NIcon {
             visible:   delegate.isPlayingThis
             icon:      "player-play"
-            color:     Color.mOnSurfaceVariant
+            color:     Color.mPrimary
             pointSize: Style.fontSizeM
         }
         NIcon {
             visible:   !delegate.isPlayingThis && delegateMouse.containsMouse
             icon:      "player-play"
-            color:     Color.mOnSurfaceVariant
+            color:     Color.mOnSurface
             pointSize: Style.fontSizeM
         }
     }
